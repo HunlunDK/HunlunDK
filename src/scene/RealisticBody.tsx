@@ -65,10 +65,14 @@ export function RealisticBody() {
 
     const g = new THREE.Group()
     const targets: { geo: THREE.BufferGeometry; base: Float32Array; normal: Float32Array; weights: Record<FatRegion, Float32Array>; visceral: Float32Array }[] = []
+    const headBox = new THREE.Box3()
 
     src.traverse((o) => {
       const m = o as THREE.Mesh
       if (!m.isMesh) return
+      // Skip the eyes — a smooth mannequin head replaces the realistic face.
+      const nm = ((m.name || '') + ' ' + ((m.material as THREE.Material)?.name || '')).toLowerCase()
+      if (nm.includes('eye')) return
       const finalM = fit.clone().multiply(m.matrixWorld)
       const geo = m.geometry.clone()
       geo.applyMatrix4(finalM)
@@ -79,8 +83,7 @@ export function RealisticBody() {
       mesh.castShadow = true; mesh.receiveShadow = true
       g.add(mesh)
 
-      // Only the body mesh morphs (skip eyes).
-      const isBody = (m.name || '').toLowerCase().includes('body') || (m.material as THREE.Material)?.name?.toLowerCase().includes('body')
+      const isBody = nm.includes('body')
       if (isBody) {
         const pos = geo.attributes.position as THREE.BufferAttribute
         const nrm = geo.attributes.normal as THREE.BufferAttribute
@@ -91,16 +94,50 @@ export function RealisticBody() {
         const weights = {} as Record<FatRegion, Float32Array>
         for (const r of FAT_REGIONS) weights[r] = new Float32Array(pos.count)
         const visceral = new Float32Array(pos.count)
+        const v = new THREE.Vector3()
         for (let i = 0; i < pos.count; i++) {
           const x = base[i * 3], y = base[i * 3 + 1], z = base[i * 3 + 2]
           const t = (y - bb.min.y) / h
           const ax = Math.abs(x)
           for (const r of FAT_REGIONS) weights[r][i] = BANDS[r].weight(t, x, z, ax)
           visceral[i] = BANDS.abdomen.weight(t, x, z, ax) * sstep(0.0, 0.05, z)
+          if (t > 0.9) headBox.expandByPoint(v.set(x, y, z)) // gather the real head bounds
         }
         targets.push({ geo, base, normal, weights, visceral })
       }
     })
+
+    // Mannequin head — a smooth, featureless form overlaid on the real head to
+    // cover the photoreal face (a fitness avatar doesn't need facial detail).
+    if (!headBox.isEmpty()) {
+      const hc = new THREE.Vector3(); const hs = new THREE.Vector3()
+      headBox.getCenter(hc); headBox.getSize(hs)
+      const ex = hs.x * 0.64 + 0.008
+      const ey = hs.y * 0.74 + 0.008 // tall enough to cover crown → jaw
+      const ez = hs.z * 0.74 + 0.012 // deeper so it covers the nose/brow
+      const headGeo = new THREE.SphereGeometry(1, 48, 40)
+      const hp = headGeo.attributes.position as THREE.BufferAttribute
+      const tmp = new THREE.Vector3()
+      for (let i = 0; i < hp.count; i++) {
+        tmp.fromBufferAttribute(hp, i)
+        const up = tmp.y // -1 chin … 1 crown
+        let sx = ex, sz = ez
+        if (up < 0) { sx *= 1 + up * 0.22; sz *= 1 + up * 0.12 } // subtle jaw
+        hp.setXYZ(i, tmp.x * sx, tmp.y * ey, tmp.z * sz)
+      }
+      headGeo.computeVertexNormals()
+      // centre on the real head, drop slightly to cover the jaw, nudge forward
+      headGeo.translate(hc.x, hc.y - ey * 0.14, hc.z + hs.z * 0.05)
+      const headMat = new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color('#c9a487'), roughness: 0.74, metalness: 0,
+        clearcoat: 0.1, clearcoatRoughness: 0.6, sheen: 0.3, sheenColor: new THREE.Color('#e8c4a4'),
+        envMapIntensity: 0.55,
+      })
+      const headMesh = new THREE.Mesh(headGeo, headMat)
+      headMesh.castShadow = true
+      g.add(headMesh)
+    }
+
     return { group: g, morphTargets: targets }
   }, [gltf])
 
