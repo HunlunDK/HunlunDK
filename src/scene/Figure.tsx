@@ -207,26 +207,27 @@ export function Figure() {
     // Muscles
     const activeIds = st.mode === 'exercise' && ex ? new Set(ex.rig.contracts) : new Set<string>()
     const involvedIds = st.mode === 'exercise' && ex ? new Set(ex.movers.map((mv) => mv.id)) : null
+    const muscleLayer = st.layers.muscle
     for (const s of muscles) {
       const bulge = activeIds.has(s.def.id) ? 1 + contraction * 0.35 : 1
       const shortening = activeIds.has(s.def.id) ? 1 - contraction * 0.12 : 1
       const lenX = (s.def.lengthExtra ?? 1) * shortening
       placeBetween(s.mesh, P(s.def.a), P(s.def.b), s.def.offset, s.def.radius * bulge, lenX)
       const mat = s.mesh.material as THREE.MeshPhysicalMaterial
-      setLayer('muscle', mat)
+      // opacity target: full when visible, strongly faded if not involved in the exercise
+      const notInvolved = involvedIds != null && !involvedIds.has(s.def.id)
+      const target = !muscleLayer.visible ? 0 : notInvolved ? 0 : muscleLayer.opacity
+      mat.opacity = THREE.MathUtils.lerp(mat.opacity ?? 1, target, 0.22)
+      mat.transparent = mat.opacity < 0.985
+      mat.depthWrite = mat.opacity > 0.6
+      mat.visible = mat.opacity > 0.01
       // activation heat + highlight
       const act = activeIds.has(s.def.id) ? contraction : 0
       const col = s.baseColor.clone().lerp(s.activeColor, act * 0.6)
       const hot = st.highlighted === s.def.id || st.pinned === s.def.id
       if (hot) col.lerp(new THREE.Color('#17e0c4'), 0.35)
       mat.color.copy(col)
-      mat.emissive.copy(s.activeColor).multiplyScalar(act * 0.25 + (hot ? 0.15 : 0))
-      // dim non-involved muscles during an exercise for focus
-      if (involvedIds && !involvedIds.has(s.def.id)) {
-        mat.opacity *= 0.14
-        mat.transparent = true
-        mat.depthWrite = false
-      }
+      mat.emissive.copy(s.activeColor).multiplyScalar(act * 0.3 + (hot ? 0.15 : 0))
     }
 
     // Bones
