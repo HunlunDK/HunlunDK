@@ -42,6 +42,8 @@ interface KineticaState {
   /** currently highlighted muscle/structure id (hover/pin) */
   highlighted: string | null
   pinned: string | null
+  /** human-readable anatomical name of the hovered/pinned structure */
+  highlightedLabel: string | null
 
   setMode: (m: Mode) => void
   setSex: (s: Sex) => void
@@ -57,6 +59,7 @@ interface KineticaState {
   setPlaying: (p: boolean) => void
   setHighlighted: (id: string | null) => void
   setPinned: (id: string | null) => void
+  setHighlightedLabel: (label: string | null) => void
 }
 
 const defaultLayers: Record<LayerKey, LayerState> = {
@@ -93,6 +96,7 @@ export const useStore = create<KineticaState>((set) => ({
   playing: false,
   highlighted: null,
   pinned: null,
+  highlightedLabel: null,
 
   setMode: (mode) =>
     set((s) => {
@@ -141,4 +145,15 @@ export const useStore = create<KineticaState>((set) => ({
   setPlaying: (playing) => set({ playing }),
   setHighlighted: (highlighted) => set({ highlighted }),
   setPinned: (pinned) => set({ pinned }),
+  setHighlightedLabel: (highlightedLabel) => set({ highlightedLabel }),
 }))
+
+/** Prettify a raw BodyParts3D mesh name for display. */
+export function prettyAnatomyName(raw: string): string {
+  return raw
+    .replace(/\.[rl]$/i, '')
+    .replace(/_/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim()
+}

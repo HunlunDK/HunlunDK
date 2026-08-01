@@ -98,6 +98,7 @@ export function RealisticAnatomy() {
   const groupRef = useRef<THREE.Group>(null)
   const setHighlighted = useStore((s) => s.setHighlighted)
   const setPinned = useStore((s) => s.setPinned)
+  const setHighlightedLabel = useStore((s) => s.setHighlightedLabel)
 
   const { group, parts } = useMemo(() => {
     const root = new THREE.Group()
@@ -204,16 +205,22 @@ export function RealisticAnatomy() {
 
   const onOver = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation()
-    const id = e.object.userData?.id as string | undefined
-    if (id) setHighlighted(id)
+    const id = (e.object.userData?.id as string) ?? null
+    const label = (e.object.userData?.label as string) ?? null
+    setHighlighted(id)
+    setHighlightedLabel(label)
   }
+  const onOut = () => { setHighlighted(null); setHighlightedLabel(null) }
   const onClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation()
-    const id = e.object.userData?.id as string | undefined
-    if (id) { const cur = useStore.getState().pinned; setPinned(cur === id ? null : id) }
+    const id = (e.object.userData?.id as string) ?? null
+    const label = (e.object.userData?.label as string) ?? null
+    const cur = useStore.getState().pinned
+    setPinned(cur === (id ?? label) ? null : (id ?? label))
+    setHighlightedLabel(label)
   }
 
-  return <group ref={groupRef} onPointerOver={onOver} onPointerOut={() => setHighlighted(null)} onClick={onClick}><primitive object={group} /></group>
+  return <group ref={groupRef} onPointerOver={onOver} onPointerOut={onOut} onClick={onClick}><primitive object={group} /></group>
 }
 
 useGLTF.preload(SKELETON)

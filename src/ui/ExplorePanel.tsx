@@ -1,28 +1,19 @@
-import { useStore } from '../state/store'
-import { MUSCLES } from '../scene/anatomy/structures'
-import { BONES } from '../scene/anatomy/structures'
+import { useStore, prettyAnatomyName } from '../state/store'
 import { GLOSSARY } from '../data/education'
 
-function findStructure(id: string | null) {
-  if (!id) return null
-  const m = MUSCLES.find((x) => x.id === id)
-  if (m) return { label: m.label, kind: 'Muscle' }
-  const b = BONES.find((x) => x.id === id)
-  if (b) return { label: b.label, kind: 'Bone' }
-  const t: Record<string, string> = {
-    distalBiceps: 'Distal biceps tendon', quadTendon: 'Patellar tendon', achilles: 'Achilles tendon',
-    hamstringTendon: 'Hamstring tendon', pecTendon: 'Pec major tendon', achillesTri: 'Triceps tendon',
-    ribcage: 'Thoracic cage', spine: 'Vertebral column',
-  }
-  if (t[id]) return { label: t[id], kind: id.includes('endon') || id.includes('achilles') ? 'Tendon' : 'Structure' }
-  return null
+function tissueKind(label: string): string {
+  const n = label.toLowerCase()
+  if (/tendon|aponeuros|retinaculum/.test(n)) return 'Tendon'
+  if (/bone|vertebra|sternum|rib|sacrum|coccyx|mandible|skull|clavicle|scapula|femur|tibia|fibula|humerus|radius|ulna|pelvis|patella|carpal|tarsal|phalan|cranium|occipital|parietal|frontal|sphenoid|ethmoid|atlas|axis/.test(n)) return 'Bone'
+  return 'Muscle'
 }
 
 export function ExplorePanel() {
-  const highlighted = useStore((s) => s.highlighted)
+  const highlightedLabel = useStore((s) => s.highlightedLabel)
   const pinned = useStore((s) => s.pinned)
-  const active = pinned ?? highlighted
-  const struct = findStructure(active)
+  const struct = highlightedLabel
+    ? { label: prettyAnatomyName(highlightedLabel), kind: tissueKind(highlightedLabel) }
+    : null
 
   return (
     <div className="panel left glass">
