@@ -53,28 +53,29 @@ interface FleshDef {
   offset: [number, number, number]
 }
 
-const FLESH: FleshDef[] = [
-  { region: 'abdomen', a: 'spineLow', b: 'chest', base: 0.11, add: 0.12, offset: [0, -0.03, 0.03] },
-  { region: 'abdomen', a: 'pelvis', b: 'spineLow', base: 0.12, add: 0.13, offset: [0, 0, 0.02] },
-  { region: 'chest', a: 'chest', b: 'neck', base: 0.12, add: 0.05, offset: [0, -0.05, 0.02] },
-  { region: 'flanks', a: 'pelvis', b: 'chest', base: 0.115, add: 0.09, offset: [-0.02, -0.02, 0] },
-  { region: 'upperBack', a: 'spineMid', b: 'neck', base: 0.11, add: 0.06, offset: [0, 0, -0.03] },
-  { region: 'lowerBack', a: 'pelvis', b: 'spineMid', base: 0.11, add: 0.06, offset: [0, 0, -0.03] },
-  { region: 'glutes', a: 'pelvis', b: 'hipL', base: 0.1, add: 0.09, offset: [-0.06, -0.05, -0.04] },
-  { region: 'glutes', a: 'pelvis', b: 'hipR', base: 0.1, add: 0.09, offset: [0.06, -0.05, -0.04] },
-  { region: 'hips', a: 'pelvis', b: 'hipL', base: 0.09, add: 0.08, offset: [-0.08, 0, 0.01] },
-  { region: 'hips', a: 'pelvis', b: 'hipR', base: 0.09, add: 0.08, offset: [0.08, 0, 0.01] },
-  { region: 'frontThigh', a: 'hipL', b: 'kneeL', base: 0.09, add: 0.07, offset: [0, 0, 0.02] },
-  { region: 'frontThigh', a: 'hipR', b: 'kneeR', base: 0.09, add: 0.07, offset: [0, 0, 0.02] },
-  { region: 'hamstring', a: 'hipL', b: 'kneeL', base: 0.085, add: 0.06, offset: [0, 0, -0.03] },
-  { region: 'hamstring', a: 'hipR', b: 'kneeR', base: 0.085, add: 0.06, offset: [0, 0, -0.03] },
-  { region: 'calf', a: 'kneeL', b: 'ankleL', base: 0.06, add: 0.03, offset: [0, 0, -0.01] },
-  { region: 'calf', a: 'kneeR', b: 'ankleR', base: 0.06, add: 0.03, offset: [0, 0, -0.01] },
-  { region: 'upperArm', a: 'shoulderL', b: 'elbowL', base: 0.06, add: 0.05, offset: [0, 0, 0] },
-  { region: 'upperArm', a: 'shoulderR', b: 'elbowR', base: 0.06, add: 0.05, offset: [0, 0, 0] },
-  { region: 'upperArm', a: 'elbowL', b: 'wristL', base: 0.045, add: 0.03, offset: [0, 0, 0] },
-  { region: 'upperArm', a: 'elbowR', b: 'wristR', base: 0.045, add: 0.03, offset: [0, 0, 0] },
-  { region: 'face', a: 'neck', b: 'head', base: 0.075, add: 0.04, offset: [0, 0.02, 0] },
+interface FleshExtra extends FleshDef { taper?: number; len?: number; wide?: number }
+const FLESH: FleshExtra[] = [
+  // ONE continuous torso trunk (pelvis→neck) so no stacked-disc rings, plus a
+  // chest bulge and belly bulge layered on with heavy overlap.
+  { region: 'abdomen', a: 'pelvis', b: 'chest', base: 0.14, add: 0.11, offset: [0, 0.03, 0.0], taper: 0.88, len: 1.4, wide: 1.12 },
+  { region: 'chest', a: 'spineMid', b: 'neck', base: 0.125, add: 0.05, offset: [0, -0.01, 0.02], taper: 0.72, len: 1.15, wide: 1.18 },
+  { region: 'abdomen', a: 'spineLow', b: 'spineMid', base: 0.12, add: 0.13, offset: [0, 0.0, 0.03], taper: 0.8, len: 1.15, wide: 1.05 },
+  { region: 'flanks', a: 'pelvis', b: 'spineMid', base: 0.118, add: 0.08, offset: [0, 0.02, -0.005], taper: 0.85, len: 1.3, wide: 1.14 },
+  { region: 'glutes', a: 'pelvis', b: 'hipL', base: 0.11, add: 0.09, offset: [-0.05, -0.06, -0.05], len: 1.3 },
+  { region: 'glutes', a: 'pelvis', b: 'hipR', base: 0.11, add: 0.09, offset: [0.05, -0.06, -0.05], len: 1.3 },
+  { region: 'hips', a: 'pelvis', b: 'hipL', base: 0.1, add: 0.08, offset: [-0.06, -0.02, 0.02], len: 1.2 },
+  { region: 'hips', a: 'pelvis', b: 'hipR', base: 0.1, add: 0.08, offset: [0.06, -0.02, 0.02], len: 1.2 },
+  { region: 'frontThigh', a: 'hipL', b: 'kneeL', base: 0.1, add: 0.07, offset: [0, 0.02, 0.01], taper: 0.6, len: 1.12 },
+  { region: 'frontThigh', a: 'hipR', b: 'kneeR', base: 0.1, add: 0.07, offset: [0, 0.02, 0.01], taper: 0.6, len: 1.12 },
+  { region: 'hamstring', a: 'hipL', b: 'kneeL', base: 0.095, add: 0.06, offset: [0, 0.02, -0.02], taper: 0.6, len: 1.1 },
+  { region: 'hamstring', a: 'hipR', b: 'kneeR', base: 0.095, add: 0.06, offset: [0, 0.02, -0.02], taper: 0.6, len: 1.1 },
+  { region: 'calf', a: 'kneeL', b: 'ankleL', base: 0.066, add: 0.03, offset: [0, 0.03, -0.01], taper: 0.5, len: 1.1 },
+  { region: 'calf', a: 'kneeR', b: 'ankleR', base: 0.066, add: 0.03, offset: [0, 0.03, -0.01], taper: 0.5, len: 1.1 },
+  { region: 'upperArm', a: 'shoulderL', b: 'elbowL', base: 0.066, add: 0.05, offset: [0, 0, 0], taper: 0.6, len: 1.15 },
+  { region: 'upperArm', a: 'shoulderR', b: 'elbowR', base: 0.066, add: 0.05, offset: [0, 0, 0], taper: 0.6, len: 1.15 },
+  { region: 'upperArm', a: 'elbowL', b: 'wristL', base: 0.05, add: 0.03, offset: [0, 0, 0], taper: 0.55, len: 1.15 },
+  { region: 'upperArm', a: 'elbowR', b: 'wristR', base: 0.05, add: 0.03, offset: [0, 0, 0], taper: 0.55, len: 1.15 },
+  { region: 'face', a: 'neck', b: 'head', base: 0.078, add: 0.035, offset: [0, 0.0, 0], taper: 0.8, len: 1.15 },
 ]
 
 export function Figure() {
@@ -162,7 +163,8 @@ export function Figure() {
   const skinMat = useMemo(() => makeSkin(), [])
   const fleshMeshes = useMemo(() => {
     return FLESH.map((f) => {
-      const mesh = new THREE.Mesh(fusiform(1, 0.5, 0.35, 0.35, 20, 16), skinMat)
+      const t = f.taper ?? 0.55
+      const mesh = new THREE.Mesh(fusiform(1, 0.5, t, t, 26, 20), skinMat)
       mesh.userData = { id: 'skin', label: 'Skin & adipose', layer: 'skin' }
       mesh.renderOrder = 2
       return { mesh, f }
@@ -213,8 +215,9 @@ export function Figure() {
       mat.emissive.copy(s.activeColor).multiplyScalar(act * 0.25 + (hot ? 0.15 : 0))
       // dim non-involved muscles during an exercise for focus
       if (involvedIds && !involvedIds.has(s.def.id)) {
-        mat.opacity *= 0.35
+        mat.opacity *= 0.14
         mat.transparent = true
+        mat.depthWrite = false
       }
     }
 
@@ -276,7 +279,9 @@ export function Figure() {
     for (const fm of fleshMeshes) {
       const infl = inflationFor(st.sex, fm.f.region, regionMass[fm.f.region] ?? dist[fm.f.region])
       const radial = fm.f.base + fm.f.add * infl
-      placeBetween(fm.mesh, P(fm.f.a), P(fm.f.b), fm.f.offset, radial, 1.05)
+      placeBetween(fm.mesh, P(fm.f.a), P(fm.f.b), fm.f.offset, radial, fm.f.len ?? 1.15)
+      // elliptical cross-section: torso reads wider than deep
+      fm.mesh.scale.x *= fm.f.wide ?? 1
       setLayer('skin', fm.mesh.material as THREE.Material)
     }
   })

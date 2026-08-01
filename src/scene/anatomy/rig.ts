@@ -96,12 +96,10 @@ export function poseForExercise(joint: RigJoint | null, c: number): Pose {
   switch (joint) {
     case 'elbowFlex': {
       // Right forearm flexes about the elbow; supinated curl to shoulder.
+      // Only the right arm animates so the demonstration reads cleanly.
       const angle = c * (Math.PI * 0.78) // ~140deg
       p.wristR = rotateAbout(p.wristR, p.elbowR, xAxis, -angle)
       p.handR = rotateAbout(p.handR, p.elbowR, xAxis, -angle)
-      // mirror the left for symmetry of a two-arm exercise (offset phase feel)
-      p.wristL = rotateAbout(p.wristL, p.elbowL, xAxis, -angle)
-      p.handL = rotateAbout(p.handL, p.elbowL, xAxis, -angle)
       break
     }
     case 'shoulderAbduct': {
