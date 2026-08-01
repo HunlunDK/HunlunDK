@@ -3,6 +3,7 @@ import { Suspense, useState } from 'react'
 import { AdaptiveDpr, AdaptiveEvents, PerformanceMonitor } from '@react-three/drei'
 import { Stage } from './scene/Stage'
 import { Figure } from './scene/Figure'
+import { MetaballBody } from './scene/MetaballBody'
 import { CameraRig } from './scene/CameraRig'
 import { Playhead } from './scene/Playhead'
 import { useStore } from './state/store'
@@ -37,6 +38,7 @@ export default function App() {
         <Suspense fallback={null}>
           <Stage dof={mode === 'exercise'}>
             <Figure />
+            <MetaballBody />
           </Stage>
         </Suspense>
         <CameraRig />

@@ -193,10 +193,12 @@ export function Figure() {
     }
     const P = (j: JointName) => pose[j]
 
+    // In Physique mode the skin surface is the hero — hide all inner anatomy.
+    const hideAnatomy = st.mode === 'physique'
     // Layer opacities
     const setLayer = (layer: LayerKey, mat: THREE.Material) => {
       const l = st.layers[layer]
-      const target = l.visible ? l.opacity : 0
+      const target = hideAnatomy || !l.visible ? 0 : l.opacity
       const m = mat as THREE.MeshPhysicalMaterial
       m.opacity = THREE.MathUtils.lerp(m.opacity ?? 1, target, 0.18)
       m.transparent = m.opacity < 0.985
@@ -216,11 +218,12 @@ export function Figure() {
       const mat = s.mesh.material as THREE.MeshPhysicalMaterial
       // opacity target: full when visible, strongly faded if not involved in the exercise
       const notInvolved = involvedIds != null && !involvedIds.has(s.def.id)
-      const target = !muscleLayer.visible ? 0 : notInvolved ? 0 : muscleLayer.opacity
+      const target = hideAnatomy || !muscleLayer.visible ? 0 : notInvolved ? 0 : muscleLayer.opacity
       mat.opacity = THREE.MathUtils.lerp(mat.opacity ?? 1, target, 0.22)
       mat.transparent = mat.opacity < 0.985
       mat.depthWrite = mat.opacity > 0.6
       mat.visible = mat.opacity > 0.01
+      s.mesh.visible = !hideAnatomy && mat.opacity > 0.01
       // activation heat + highlight
       const act = activeIds.has(s.def.id) ? contraction : 0
       const col = s.baseColor.clone().lerp(s.activeColor, act * 0.6)
@@ -257,12 +260,13 @@ export function Figure() {
           m.scale.setScalar(0.62)
         }
       }
-      const mat = m.material as THREE.MeshPhysicalMaterial
-      // clone-free: bones share material, so drive opacity on the shared mat once below
       const hot = st.highlighted === b.def.id || st.pinned === b.def.id
       m.userData.hot = hot
+      m.visible = !hideAnatomy && st.layers.skeleton.visible
     }
     setLayer('skeleton', boneMat)
+    ribcage.visible = !hideAnatomy && st.layers.skeleton.visible
+    spine.visible = !hideAnatomy && st.layers.skeleton.visible
     // position ribcage & spine
     ribcage.position.copy(P('chest')).sub(new THREE.Vector3(0, 0.28, 0))
     ;(ribcage.children as THREE.Mesh[]).forEach((c) => ((c.material as THREE.Material).visible = boneMat.visible))
@@ -279,6 +283,7 @@ export function Figure() {
       const a = P(t.def.a), b = P(t.def.b)
       const from = a.clone().lerp(b, t.def.from)
       const to = a.clone().lerp(b, Math.min(1, t.def.to))
+      t.mesh.visible = !hideAnatomy
       const old = t.mesh.geometry
       t.mesh.geometry = tendonTube(from, to, t.def.tube)
       old.dispose()
@@ -328,7 +333,7 @@ export function Figure() {
       <primitive object={spine} />
       {muscles.map((m, i) => <primitive key={`m${i}`} object={m.mesh} />)}
       {tendons.map((t, i) => <primitive key={`t${i}`} object={t.mesh} />)}
-      {fleshMeshes.map((f, i) => <primitive key={`f${i}`} object={f.mesh} />)}
+      {/* skin is rendered as a unified marching-cubes surface (MetaballBody) */}
     </group>
   )
 }
