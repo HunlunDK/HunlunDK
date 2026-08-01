@@ -2,3 +2,5 @@ node_modules
 dist
 *.log
 _shot.mjs
+_c_*.png
+_crit_*.png
