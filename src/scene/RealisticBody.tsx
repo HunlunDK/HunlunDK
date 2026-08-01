@@ -113,21 +113,36 @@ export function RealisticBody() {
       const hc = new THREE.Vector3(); const hs = new THREE.Vector3()
       headBox.getCenter(hc); headBox.getSize(hs)
       const ex = hs.x * 0.64 + 0.008
-      const ey = hs.y * 0.74 + 0.008 // tall enough to cover crown → jaw
-      const ez = hs.z * 0.74 + 0.012 // deeper so it covers the nose/brow
-      const headGeo = new THREE.SphereGeometry(1, 48, 40)
+      const ey = hs.y * 0.76 + 0.008 // tall enough to cover crown → jaw
+      const ez = hs.z * 0.72 + 0.012
+      const headGeo = new THREE.SphereGeometry(1, 64, 56)
       const hp = headGeo.attributes.position as THREE.BufferAttribute
       const tmp = new THREE.Vector3()
       for (let i = 0; i < hp.count; i++) {
         tmp.fromBufferAttribute(hp, i)
         const up = tmp.y // -1 chin … 1 crown
-        let sx = ex, sz = ez
-        if (up < 0) { sx *= 1 + up * 0.22; sz *= 1 + up * 0.12 } // subtle jaw
-        hp.setXYZ(i, tmp.x * sx, tmp.y * ey, tmp.z * sz)
+        const fwd = tmp.z // + front (face)
+        // smooth head silhouette — all displacements use smoothstep to avoid seams
+        const width = 0.62 + 0.38 * sstep(-0.85, 0.2, up) // narrow chin → full cranium
+        let x = tmp.x * ex * width
+        let y = tmp.y * ey
+        let z = tmp.z * ez
+        // occipital bulge (back of skull projects rearward)
+        z -= sstep(-0.05, -0.85, fwd) * ez * 0.3
+        // jaw depth pulls in at the lower front; chin projects gently
+        const lower = sstep(0.0, -0.85, up)
+        z *= 1 - 0.22 * lower * sstep(-0.3, 0.5, fwd)
+        const chin = sstep(-0.2, -0.8, up) * sstep(0.05, 0.7, fwd)
+        z += chin * ez * 0.2
+        y -= sstep(-0.35, -0.9, up) * ey * 0.05
+        // subtle flat face plane (not a round ball), smoothly masked to mid-face
+        const faceMask = sstep(0.45, 0.95, fwd) * sstep(0.62, 0.0, Math.abs(up - 0.05))
+        z -= faceMask * ez * 0.1
+        hp.setXYZ(i, x, y, z)
       }
       headGeo.computeVertexNormals()
       // centre on the real head, drop slightly to cover the jaw, nudge forward
-      headGeo.translate(hc.x, hc.y - ey * 0.14, hc.z + hs.z * 0.05)
+      headGeo.translate(hc.x, hc.y - ey * 0.12, hc.z + hs.z * 0.04)
       const headMat = new THREE.MeshPhysicalMaterial({
         color: new THREE.Color('#c9a487'), roughness: 0.74, metalness: 0,
         clearcoat: 0.1, clearcoatRoughness: 0.6, sheen: 0.3, sheenColor: new THREE.Color('#e8c4a4'),
