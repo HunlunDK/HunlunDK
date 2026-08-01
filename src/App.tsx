@@ -2,7 +2,7 @@ import { Canvas } from '@react-three/fiber'
 import { Suspense, useState } from 'react'
 import { AdaptiveDpr, AdaptiveEvents, PerformanceMonitor } from '@react-three/drei'
 import { Stage } from './scene/Stage'
-import { Figure } from './scene/Figure'
+import { RealisticAnatomy } from './scene/RealisticAnatomy'
 import { RealisticBody } from './scene/RealisticBody'
 import { CameraRig } from './scene/CameraRig'
 import { Playhead } from './scene/Playhead'
@@ -37,8 +37,7 @@ export default function App() {
         <AdaptiveEvents />
         <Suspense fallback={null}>
           <Stage dof={false}>
-            <Figure />
-            <RealisticBody />
+            {mode === 'physique' ? <RealisticBody /> : <RealisticAnatomy />}
           </Stage>
         </Suspense>
         <CameraRig />
