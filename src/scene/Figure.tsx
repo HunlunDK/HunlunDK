@@ -6,6 +6,7 @@ import { neutralPose, poseForExercise, repCurve, Pose, JointName } from './anato
 import { MUSCLES, BONES, TENDONS, MuscleDef } from './anatomy/structures'
 import {
   fusiform, boneShaft, ellipsoid, ribArc, vertebra, tendonTube, scapula, pelvisGeometry,
+  handGeometry, footGeometry,
 } from './anatomy/geometry'
 import { makeBone, makeMuscle, makeTendon, makeFat, makeSkin } from '../materials/tissues'
 import { exerciseById } from '../data/exercises'
@@ -87,10 +88,15 @@ export function Figure() {
 
   // Build muscles (each its own mesh + material for independent activation)
   const muscles = useMemo<StructMesh[]>(() => {
-    return MUSCLES.map((def) => {
+    return MUSCLES.map((def, idx) => {
       const t = def.taper ?? 0.35
       const geo = fusiform(1, def.bulge, t, t)
-      const base = new THREE.Color(def.color ?? '#b8403a').multiplyScalar(def.shade ?? 1)
+      // deterministic per-muscle hue/sat jitter so it isn't one uniform candy-red
+      const base = new THREE.Color(def.color ?? '#8f2d2d')
+      const hsl = { h: 0, s: 0, l: 0 }
+      base.getHSL(hsl)
+      const j = ((idx * 2654435761) % 1000) / 1000 - 0.5
+      base.setHSL(hsl.h + j * 0.016, hsl.s + j * 0.09, hsl.l * (def.shade ?? 1))
       const mat = makeMuscle(base.getStyle())
       const mesh = new THREE.Mesh(geo, mat)
       mesh.castShadow = true
@@ -104,9 +110,11 @@ export function Figure() {
     return BONES.map((def) => {
       let geo: THREE.BufferGeometry
       switch (def.kind) {
-        case 'skull': geo = ellipsoid(0.076, 0.096, 0.086); break
+        case 'skull': geo = ellipsoid(0.087, 0.107, 0.096); break
         case 'ellipsoid': geo = ellipsoid(...(def.scale ?? [0.03, 0.03, 0.03])); break
         case 'scapula': geo = scapula(); break
+        case 'hand': geo = handGeometry(); break
+        case 'foot': geo = footGeometry(); break
         case 'pelvis': geo = pelvisGeometry(); break
         case 'ribcage': geo = new THREE.BufferGeometry(); break
         case 'spine': geo = vertebra(); break
@@ -228,6 +236,17 @@ export function Figure() {
         placeBetween(m, P(b.def.a), P(b.def.b), [0, 0, 0], 1)
       } else if (b.def.at) {
         m.position.copy(P(b.def.at))
+        if (b.def.kind === 'hand') {
+          // orient the palm so fingers continue the forearm line
+          const wrist = P(b.def.side === 'L' ? 'wristL' : 'wristR')
+          const dir = m.position.clone().sub(wrist).normalize()
+          m.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), dir)
+          m.position.copy(wrist).addScaledVector(dir, 0.05)
+        } else if (b.def.kind === 'foot') {
+          const ankle = P(b.def.side === 'L' ? 'ankleL' : 'ankleR')
+          m.position.copy(ankle).add(new THREE.Vector3(0, -0.04, 0.03))
+          m.rotation.set(0, 0, 0)
+        }
         if (b.def.kind === 'scapula') {
           // tuck the blades flat against the upper back, behind the ribcage
           m.position.z -= 0.11

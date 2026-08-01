@@ -30,7 +30,7 @@ export interface MuscleDef {
 export interface BoneDef {
   id: string
   label: string
-  kind: 'shaft' | 'ellipsoid' | 'skull' | 'ribcage' | 'pelvis' | 'spine' | 'scapula'
+  kind: 'shaft' | 'ellipsoid' | 'skull' | 'ribcage' | 'pelvis' | 'spine' | 'scapula' | 'hand' | 'foot'
   a?: JointName
   b?: JointName
   at?: JointName
@@ -43,8 +43,8 @@ export interface BoneDef {
 const arm = (side: 'L' | 'R'): MuscleDef[] => {
   const s = side === 'L' ? -1 : 1
   return [
-    // deltoid: a rounded cap sitting over the shoulder, only the upper third of the humerus
-    { id: 'deltoid', label: 'Deltoid', a: `shoulder${side}` as JointName, b: `elbow${side}` as JointName, radius: 0.062, bulge: 0.14, offset: [s * 0.025, 0.02, 0.0], side },
+    // deltoid: a rounded cap seated just below the acromion over the upper humerus
+    { id: 'deltoid', label: 'Deltoid', a: `shoulder${side}` as JointName, b: `elbow${side}` as JointName, radius: 0.048, bulge: 0.16, offset: [s * 0.028, -0.02, 0.0], side, taper: 0.4 },
     { id: 'triceps', label: 'Triceps brachii', a: `shoulder${side}` as JointName, b: `elbow${side}` as JointName, radius: 0.05, bulge: 0.5, offset: [s * 0.006, -0.03, -0.035], side, shade: 0.92 },
     { id: 'biceps', label: 'Biceps brachii', a: `shoulder${side}` as JointName, b: `elbow${side}` as JointName, radius: 0.046, bulge: 0.55, offset: [s * -0.006, -0.02, 0.035], side },
     { id: 'brachialis', label: 'Brachialis', a: `shoulder${side}` as JointName, b: `elbow${side}` as JointName, radius: 0.04, bulge: 0.75, offset: [s * -0.008, -0.05, 0.012], side, shade: 0.85 },
@@ -69,9 +69,10 @@ export const MUSCLES: MuscleDef[] = [
   // deep trunk mass — unifies the torso so the surface muscles sit on a solid form
   { id: 'trunk', label: 'Thoracoabdominal wall', a: 'pelvis', b: 'chest', radius: 0.115, bulge: 0.6, offset: [0, 0.02, 0.0], side: 'C', shade: 0.72 },
   { id: 'trunkUp', label: 'Thorax', a: 'spineMid', b: 'neck', radius: 0.105, bulge: 0.5, offset: [0, -0.02, 0.0], side: 'C', shade: 0.72 },
-  { id: 'neck', label: 'Neck', a: 'neck', b: 'head', radius: 0.07, bulge: 0.45, offset: [0, -0.01, -0.005], side: 'C', shade: 0.8, taper: 0.82, lengthExtra: 1.2 },
-  { id: 'traps', label: 'Trapezius (upper)', a: 'neck', b: 'shoulderL', radius: 0.055, bulge: 0.35, offset: [0, 0.02, -0.02], side: 'L', shade: 0.94, taper: 0.5 },
-  { id: 'traps', label: 'Trapezius (upper)', a: 'neck', b: 'shoulderR', radius: 0.055, bulge: 0.35, offset: [0, 0.02, -0.02], side: 'R', shade: 0.94, taper: 0.5 },
+  { id: 'neck', label: 'Neck', a: 'neck', b: 'head', radius: 0.08, bulge: 0.4, offset: [0, -0.005, -0.006], side: 'C', shade: 0.82, taper: 0.92, lengthExtra: 1.35 },
+  // trapezius ramps rise from each shoulder up into the skull base — welds head to torso
+  { id: 'traps', label: 'Trapezius (upper)', a: 'shoulderL', b: 'head', radius: 0.05, bulge: 0.72, offset: [0, 0.0, -0.03], side: 'L', shade: 0.9, taper: 0.35 },
+  { id: 'traps', label: 'Trapezius (upper)', a: 'shoulderR', b: 'head', radius: 0.05, bulge: 0.72, offset: [0, 0.0, -0.03], side: 'R', shade: 0.9, taper: 0.35 },
   // torso — front
   { id: 'pecs', label: 'Pectoralis major', a: 'chest', b: 'shoulderL', radius: 0.072, bulge: 0.45, offset: [-0.01, -0.02, 0.055], side: 'L' },
   { id: 'pecs', label: 'Pectoralis major', a: 'chest', b: 'shoulderR', radius: 0.072, bulge: 0.45, offset: [0.01, -0.02, 0.055], side: 'R' },
@@ -109,14 +110,14 @@ export const BONES: BoneDef[] = [
   { id: 'humerus', label: 'Humerus', kind: 'shaft', a: 'shoulderR', b: 'elbowR', rA: 0.022, rB: 0.02, side: 'R' },
   { id: 'radioulna', label: 'Radius & ulna', kind: 'shaft', a: 'elbowL', b: 'wristL', rA: 0.018, rB: 0.013, side: 'L' },
   { id: 'radioulna', label: 'Radius & ulna', kind: 'shaft', a: 'elbowR', b: 'wristR', rA: 0.018, rB: 0.013, side: 'R' },
-  { id: 'handbones', label: 'Carpals & phalanges', kind: 'ellipsoid', at: 'handL', scale: [0.042, 0.058, 0.017], side: 'L' },
-  { id: 'handbones', label: 'Carpals & phalanges', kind: 'ellipsoid', at: 'handR', scale: [0.042, 0.058, 0.017], side: 'R' },
+  { id: 'handbones', label: 'Carpals & phalanges', kind: 'hand', at: 'handL', side: 'L' },
+  { id: 'handbones', label: 'Carpals & phalanges', kind: 'hand', at: 'handR', side: 'R' },
   { id: 'femur', label: 'Femur', kind: 'shaft', a: 'hipL', b: 'kneeL', rA: 0.028, rB: 0.024, side: 'L' },
   { id: 'femur', label: 'Femur', kind: 'shaft', a: 'hipR', b: 'kneeR', rA: 0.028, rB: 0.024, side: 'R' },
   { id: 'tibfib', label: 'Tibia & fibula', kind: 'shaft', a: 'kneeL', b: 'ankleL', rA: 0.024, rB: 0.017, side: 'L' },
   { id: 'tibfib', label: 'Tibia & fibula', kind: 'shaft', a: 'kneeR', b: 'ankleR', rA: 0.024, rB: 0.017, side: 'R' },
-  { id: 'footbones', label: 'Tarsals & metatarsals', kind: 'ellipsoid', at: 'footL', scale: [0.04, 0.02, 0.07], side: 'L' },
-  { id: 'footbones', label: 'Tarsals & metatarsals', kind: 'ellipsoid', at: 'footR', scale: [0.04, 0.02, 0.07], side: 'R' },
+  { id: 'footbones', label: 'Tarsals & metatarsals', kind: 'foot', at: 'footL', side: 'L' },
+  { id: 'footbones', label: 'Tarsals & metatarsals', kind: 'foot', at: 'footR', side: 'R' },
 ]
 
 /** Tendon segments highlighted at insertions for the exercise mode. */

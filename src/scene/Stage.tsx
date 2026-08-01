@@ -71,11 +71,11 @@ export function Stage({ children, dof = false }: { children: ReactNode; dof?: bo
           <></>
         )}
         <Bloom
-          intensity={0.55}
-          luminanceThreshold={0.72}
-          luminanceSmoothing={0.28}
+          intensity={0.26}
+          luminanceThreshold={0.92}
+          luminanceSmoothing={0.14}
           mipmapBlur
-          radius={0.66}
+          radius={0.5}
         />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
         <Vignette eskil={false} offset={0.28} darkness={0.72} />

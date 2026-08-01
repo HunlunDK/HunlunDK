@@ -29,8 +29,8 @@ export function neutralPose(): Pose {
     spineLow: v(0, 0.15, 0.01),
     spineMid: v(0, 0.32, 0.015),
     chest: v(0, 0.50, 0.01),
-    neck: v(0, 0.60, -0.005),
-    head: v(0, 0.70, 0.01),
+    neck: v(0, 0.575, -0.005),
+    head: v(0, 0.665, 0.012),
 
     // arms hang in a gentle A-pose, close to the torso
     shoulderL: v(-0.17, 0.55, 0.0),

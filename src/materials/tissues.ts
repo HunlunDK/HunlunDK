@@ -34,10 +34,13 @@ function injectFibers(mat: THREE.Material, scale = 42, strength = 0.5) {
          uniform float uFiberScale;
          uniform float uFiberStrength;
          varying vec3 vFiberPos;
+         // Fibers run ALONG the muscle long axis (local +Y): variation is in the
+         // azimuthal angle so striations read as longitudinal, not circumferential rings.
          float fiberNoise(vec3 p){
-           return sin(p.y * uFiberScale) * 0.5
-                + sin(p.y * uFiberScale * 2.13 + p.x * 6.0) * 0.25
-                + sin(p.x * uFiberScale * 0.7) * 0.15;
+           float ang = atan(p.x, p.z);
+           return sin(ang * uFiberScale) * 0.5
+                + sin(ang * uFiberScale * 1.73 + p.y * 3.5) * 0.32
+                + sin(ang * uFiberScale * 0.5 - p.y * 1.5) * 0.16;
          }`,
       )
       .replace(
@@ -58,11 +61,11 @@ function injectFibers(mat: THREE.Material, scale = 42, strength = 0.5) {
 
 export function makeBone(): THREE.MeshPhysicalMaterial {
   const m = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color('#e9e2d0'),
-    roughness: 0.55,
+    color: new THREE.Color('#d8cdb4'),
+    roughness: 0.64,
     metalness: 0,
-    clearcoat: 0.15,
-    clearcoatRoughness: 0.6,
+    clearcoat: 0.12,
+    clearcoatRoughness: 0.62,
     sheen: 0.3,
     sheenColor: new THREE.Color('#fff6e0'),
     transmission: 0.06,
@@ -74,25 +77,25 @@ export function makeBone(): THREE.MeshPhysicalMaterial {
   return m
 }
 
-export function makeMuscle(color: THREE.ColorRepresentation = '#b8403a'): THREE.MeshPhysicalMaterial {
+export function makeMuscle(color: THREE.ColorRepresentation = '#8f2d2d'): THREE.MeshPhysicalMaterial {
   const m = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(color),
-    roughness: 0.42,
+    roughness: 0.5,
     metalness: 0,
-    clearcoat: 0.6,
-    clearcoatRoughness: 0.35,
-    sheen: 0.5,
-    sheenColor: new THREE.Color('#ff6a5a'),
-    sheenRoughness: 0.5,
-    transmission: 0.18,
-    thickness: 0.9,
-    ior: 1.38,
-    attenuationColor: new THREE.Color('#7a1e18'),
-    attenuationDistance: 0.6,
-    specularIntensity: 1,
-    specularColor: new THREE.Color('#ffd9c9'),
+    clearcoat: 0.22,
+    clearcoatRoughness: 0.48,
+    sheen: 0.35,
+    sheenColor: new THREE.Color('#c65a4a'),
+    sheenRoughness: 0.6,
+    transmission: 0.12,
+    thickness: 0.8,
+    ior: 1.37,
+    attenuationColor: new THREE.Color('#5a1410'),
+    attenuationDistance: 0.5,
+    specularIntensity: 0.7,
+    specularColor: new THREE.Color('#e8b8a8'),
   })
-  injectFibers(m, 46, 0.55)
+  injectFibers(m, 30, 0.44)
   return m
 }
 

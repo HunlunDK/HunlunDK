@@ -134,23 +134,65 @@ export function pelvisGeometry(): THREE.BufferGeometry {
   return mergeGeometries(geos)
 }
 
-/** Minimal geometry merge (position+normal). */
+/** A simple but readable hand: rounded palm block + four finger ridges + thumb. */
+export function handGeometry(): THREE.BufferGeometry {
+  const parts: THREE.BufferGeometry[] = []
+  const palm = new THREE.BoxGeometry(0.075, 0.085, 0.028, 4, 4, 2)
+  parts.push(palm)
+  for (let i = 0; i < 4; i++) {
+    const f = new THREE.CapsuleGeometry(0.011, 0.05, 3, 6)
+    f.translate((i - 1.5) * 0.019, -0.075, 0)
+    parts.push(f)
+  }
+  const thumb = new THREE.CapsuleGeometry(0.013, 0.038, 3, 6)
+  thumb.rotateZ(0.9)
+  thumb.translate(-0.045, -0.02, 0.006)
+  parts.push(thumb)
+  const geo = mergeGeometries(parts)
+  geo.computeVertexNormals()
+  return geo
+}
+
+/** A foot wedge: heel lump tapering to a flat forefoot, flat plantar underside. */
+export function footGeometry(): THREE.BufferGeometry {
+  const geo = new THREE.CylinderGeometry(1, 1, 1, 16, 8, false)
+  const pos = geo.attributes.position as THREE.BufferAttribute
+  const v = new THREE.Vector3()
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i)
+    const t = v.y + 0.5 // 0 heel .. 1 toe (we map Y→length along foot)
+    const width = 0.035 * (0.85 + 0.3 * Math.sin(t * Math.PI))
+    const height = 0.03 * (1 - t * 0.55)
+    pos.setX(i, v.x * width)
+    pos.setZ(i, v.z * height)
+    pos.setY(i, (t - 0.5) * 0.16) // foot length along Y
+  }
+  // flatten the sole
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i)
+    if (v.z < -0.006) pos.setZ(i, -0.006)
+  }
+  geo.computeVertexNormals()
+  // orient so length runs +Z (forward), sole down
+  geo.rotateX(Math.PI / 2)
+  return geo
+}
+
+/** Minimal geometry merge (position only). Converts indexed inputs to
+ * non-indexed first so triangle topology is preserved, then recomputes normals. */
 export function mergeGeometries(geos: THREE.BufferGeometry[]): THREE.BufferGeometry {
+  const flat = geos.map((g) => (g.index ? g.toNonIndexed() : g))
   let total = 0
-  for (const g of geos) total += (g.attributes.position as THREE.BufferAttribute).count
+  for (const g of flat) total += (g.attributes.position as THREE.BufferAttribute).count
   const positions = new Float32Array(total * 3)
-  const normals = new Float32Array(total * 3)
   let offset = 0
-  for (const g of geos) {
+  for (const g of flat) {
     const p = g.attributes.position as THREE.BufferAttribute
-    const n = (g.attributes.normal as THREE.BufferAttribute) ?? null
     positions.set(p.array as Float32Array, offset * 3)
-    if (n) normals.set(n.array as Float32Array, offset * 3)
     offset += p.count
   }
   const geo = new THREE.BufferGeometry()
   geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  geo.setAttribute('normal', new THREE.BufferAttribute(normals, 3))
   geo.computeVertexNormals()
   return geo
 }

@@ -9,11 +9,12 @@ CameraControls.install({ THREE })
 
 /** Camera + target framing per exercise joint region (world space). */
 const FOCUS: Record<string, { cam: [number, number, number]; tgt: [number, number, number] }> = {
-  elbow: { cam: [1.15, 0.42, 0.72], tgt: [0.26, 0.34, 0.05] },
-  shoulder: { cam: [1.1, 0.78, 1.0], tgt: [0.2, 0.58, 0.05] },
-  hip: { cam: [1.2, 0.35, 1.5], tgt: [0.0, 0.1, 0.05] },
-  knee: { cam: [0.95, -0.15, 1.35], tgt: [0.12, -0.4, 0.05] },
-  spine: { cam: [1.3, 0.6, 1.7], tgt: [0.0, 0.35, 0.0] },
+  // lateral / profile framings so the joint's flexion arc reads clearly
+  elbow: { cam: [1.55, 0.34, 0.62], tgt: [0.24, 0.30, 0.04] },
+  shoulder: { cam: [1.45, 0.72, 0.85], tgt: [0.2, 0.56, 0.03] },
+  hip: { cam: [1.55, 0.28, 0.9], tgt: [0.02, 0.08, 0.02] },
+  knee: { cam: [1.4, -0.2, 0.95], tgt: [0.12, -0.42, 0.04] },
+  spine: { cam: [1.7, 0.5, 1.1], tgt: [0.0, 0.32, 0.0] },
 }
 
 export function CameraRig() {
