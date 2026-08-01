@@ -36,7 +36,7 @@ export default function App() {
         <AdaptiveDpr pixelated={false} />
         <AdaptiveEvents />
         <Suspense fallback={null}>
-          <Stage dof={mode === 'exercise'}>
+          <Stage dof={false}>
             <Figure />
             <MetaballBody />
           </Stage>

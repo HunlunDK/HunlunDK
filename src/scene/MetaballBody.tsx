@@ -27,27 +27,36 @@ interface Seed {
   offset: [number, number, number]
 }
 
-// tuned so the union reads as a torso + limbs; base radii in metres
+// tuned so the union reads as a torso + limbs; base radii in metres.
+// negative `add` on a seed is not used; instead limbs are pushed outward and
+// the crotch/axilla gaps are opened by seating the torso balls higher/narrower.
 const SEEDS: Seed[] = [
-  { region: 'abdomen', a: 'pelvis', b: 'spineMid', count: 4, base: 0.15, add: 0.11, offset: [0, 0.02, 0.01] },
-  { region: 'chest', a: 'spineMid', b: 'neck', count: 3, base: 0.16, add: 0.05, offset: [0, -0.01, 0.02] },
-  { region: 'flanks', a: 'pelvis', b: 'spineMid', count: 3, base: 0.145, add: 0.08, offset: [0, 0.02, -0.01] },
-  { region: 'face', a: 'neck', b: 'head', count: 2, base: 0.072, add: 0.025, offset: [0, -0.02, 0] },
-  { region: 'face', a: 'head', b: 'head', count: 1, base: 0.115, add: 0.03, offset: [0, 0.02, 0.005] },
-  { region: 'calf', a: 'ankleL', b: 'footL', count: 2, base: 0.06, add: 0.02, offset: [0, 0, 0.02] },
-  { region: 'calf', a: 'ankleR', b: 'footR', count: 2, base: 0.06, add: 0.02, offset: [0, 0, 0.02] },
-  { region: 'upperArm', a: 'wristL', b: 'handL', count: 2, base: 0.055, add: 0.02, offset: [0, 0, 0] },
-  { region: 'upperArm', a: 'wristR', b: 'handR', count: 2, base: 0.055, add: 0.02, offset: [0, 0, 0] },
-  { region: 'glutes', a: 'pelvis', b: 'hipL', count: 2, base: 0.13, add: 0.08, offset: [-0.03, -0.04, -0.03] },
-  { region: 'glutes', a: 'pelvis', b: 'hipR', count: 2, base: 0.13, add: 0.08, offset: [0.03, -0.04, -0.03] },
-  { region: 'frontThigh', a: 'hipL', b: 'kneeL', count: 4, base: 0.135, add: 0.06, offset: [0, 0, 0.005] },
-  { region: 'frontThigh', a: 'hipR', b: 'kneeR', count: 4, base: 0.135, add: 0.06, offset: [0, 0, 0.005] },
-  { region: 'calf', a: 'kneeL', b: 'ankleL', count: 3, base: 0.088, add: 0.03, offset: [0, 0.02, -0.01] },
-  { region: 'calf', a: 'kneeR', b: 'ankleR', count: 3, base: 0.088, add: 0.03, offset: [0, 0.02, -0.01] },
-  { region: 'upperArm', a: 'shoulderL', b: 'elbowL', count: 3, base: 0.09, add: 0.04, offset: [0, 0, 0] },
-  { region: 'upperArm', a: 'shoulderR', b: 'elbowR', count: 3, base: 0.09, add: 0.04, offset: [0, 0, 0] },
-  { region: 'upperArm', a: 'elbowL', b: 'wristL', count: 3, base: 0.07, add: 0.03, offset: [0, 0, 0] },
-  { region: 'upperArm', a: 'elbowR', b: 'wristR', count: 3, base: 0.07, add: 0.03, offset: [0, 0, 0] },
+  // torso — start the belly above the pelvis so the crotch isn't a bulge
+  { region: 'abdomen', a: 'spineLow', b: 'spineMid', count: 3, base: 0.152, add: 0.12, offset: [0, 0.0, 0.01] },
+  { region: 'abdomen', a: 'pelvis', b: 'spineLow', count: 2, base: 0.13, add: 0.11, offset: [0, 0.03, 0.0] },
+  { region: 'chest', a: 'spineMid', b: 'neck', count: 3, base: 0.15, add: 0.05, offset: [0, -0.02, 0.02] },
+  { region: 'flanks', a: 'spineLow', b: 'spineMid', count: 2, base: 0.14, add: 0.08, offset: [0, 0.0, -0.01] },
+  // head + neck
+  { region: 'face', a: 'neck', b: 'head', count: 2, base: 0.072, add: 0.022, offset: [0, -0.03, 0] },
+  { region: 'face', a: 'head', b: 'head', count: 1, base: 0.1, add: 0.028, offset: [0, 0.02, 0.005] },
+  // arms — kept slim and close to the bone so they resolve as separate limbs;
+  // the top ball starts below the shoulder so the deltoid/torso don't web together
+  { region: 'upperArm', a: 'elbowL', b: 'shoulderL', count: 3, base: 0.07, add: 0.035, offset: [0, 0, 0] },
+  { region: 'upperArm', a: 'elbowR', b: 'shoulderR', count: 3, base: 0.07, add: 0.035, offset: [0, 0, 0] },
+  { region: 'upperArm', a: 'elbowL', b: 'wristL', count: 3, base: 0.062, add: 0.03, offset: [0, 0, 0] },
+  { region: 'upperArm', a: 'elbowR', b: 'wristR', count: 3, base: 0.062, add: 0.03, offset: [0, 0, 0] },
+  { region: 'upperArm', a: 'wristL', b: 'handL', count: 2, base: 0.05, add: 0.02, offset: [0, 0, 0] },
+  { region: 'upperArm', a: 'wristR', b: 'handR', count: 2, base: 0.05, add: 0.02, offset: [0, 0, 0] },
+  // hips / glutes / legs
+  { region: 'glutes', a: 'pelvis', b: 'hipL', count: 2, base: 0.125, add: 0.08, offset: [-0.035, -0.04, -0.03] },
+  { region: 'glutes', a: 'pelvis', b: 'hipR', count: 2, base: 0.125, add: 0.08, offset: [0.035, -0.04, -0.03] },
+  { region: 'frontThigh', a: 'hipL', b: 'kneeL', count: 4, base: 0.132, add: 0.06, offset: [-0.005, 0, 0.005] },
+  { region: 'frontThigh', a: 'hipR', b: 'kneeR', count: 4, base: 0.132, add: 0.06, offset: [0.005, 0, 0.005] },
+  { region: 'calf', a: 'kneeL', b: 'ankleL', count: 3, base: 0.086, add: 0.03, offset: [0, 0.02, -0.01] },
+  { region: 'calf', a: 'kneeR', b: 'ankleR', count: 3, base: 0.086, add: 0.03, offset: [0, 0.02, -0.01] },
+  // blunt feet so legs don't dagger into the floor
+  { region: 'calf', a: 'ankleL', b: 'footL', count: 3, base: 0.062, add: 0.02, offset: [0, -0.01, 0.03] },
+  { region: 'calf', a: 'ankleR', b: 'footR', count: 3, base: 0.062, add: 0.02, offset: [0, -0.01, 0.03] },
 ]
 
 export function MetaballBody() {

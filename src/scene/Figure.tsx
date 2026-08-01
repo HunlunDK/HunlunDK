@@ -6,7 +6,7 @@ import { neutralPose, poseForExercise, repCurve, Pose, JointName } from './anato
 import { MUSCLES, BONES, TENDONS, MuscleDef } from './anatomy/structures'
 import {
   fusiform, boneShaft, ellipsoid, ribArc, vertebra, tendonTube, scapula, pelvisGeometry,
-  handGeometry, footGeometry,
+  handGeometry, footGeometry, headGeometry,
 } from './anatomy/geometry'
 import { makeBone, makeMuscle, makeTendon, makeFat, makeSkin } from '../materials/tissues'
 import { exerciseById } from '../data/exercises'
@@ -110,7 +110,7 @@ export function Figure() {
     return BONES.map((def) => {
       let geo: THREE.BufferGeometry
       switch (def.kind) {
-        case 'skull': geo = ellipsoid(0.087, 0.107, 0.096); break
+        case 'skull': geo = headGeometry(); break
         case 'ellipsoid': geo = ellipsoid(...(def.scale ?? [0.03, 0.03, 0.03])); break
         case 'scapula': geo = scapula(); break
         case 'hand': geo = handGeometry(); break

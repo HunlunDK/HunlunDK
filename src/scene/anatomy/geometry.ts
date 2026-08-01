@@ -134,6 +134,52 @@ export function pelvisGeometry(): THREE.BufferGeometry {
   return mergeGeometries(geos)
 }
 
+/**
+ * A recognisable head/skull: an ellipsoid displaced into a cranium with a brow
+ * ridge, nasal wedge, cheekbones, tapered jaw/chin and occipital bulge. Local
+ * +Y up, +Z forward (face). Sized in metres for the figure.
+ */
+export function headGeometry(): THREE.BufferGeometry {
+  const geo = new THREE.SphereGeometry(1, 48, 40)
+  const pos = geo.attributes.position as THREE.BufferAttribute
+  const p = new THREE.Vector3()
+  const RX = 0.072, RY = 0.094, RZ = 0.086
+  for (let i = 0; i < pos.count; i++) {
+    p.fromBufferAttribute(pos, i)
+    const dir = p.clone().normalize()
+    let x = dir.x * RX, y = dir.y * RY, z = dir.z * RZ
+    const up = dir.y // -1..1
+    const fwd = dir.z // -1..1 (front +)
+    const side = Math.abs(dir.x)
+
+    // jaw & chin: narrow the lower face, pull chin forward-down
+    if (up < 0) {
+      const jaw = 1 + up * 0.45 // shrink toward bottom
+      x *= Math.max(0.5, jaw)
+      z *= Math.max(0.62, 1 + up * 0.3)
+      if (fwd > 0.2 && up < -0.15) { z += 0.010 * fwd * -up * 4; y -= 0.006 } // chin
+    }
+    // cranium: slightly boxier top-back
+    if (up > 0.2) { x *= 1.03; if (fwd < 0) z *= 1.05 }
+    // occipital bulge (back of head)
+    if (fwd < -0.3) z -= 0.012 * (-fwd - 0.3)
+    // brow ridge just above eye line
+    if (fwd > 0.55 && up > 0.02 && up < 0.28) z += 0.008
+    // eye-socket slight recess
+    if (fwd > 0.5 && up > 0.0 && up < 0.22 && side > 0.18 && side < 0.5) z -= 0.006
+    // nose wedge (center front, mid)
+    if (fwd > 0.6 && side < 0.16 && up > -0.28 && up < 0.06) {
+      const n = (1 - side / 0.16) * (1 - Math.abs(up + 0.11) / 0.17)
+      if (n > 0) z += 0.020 * n
+    }
+    // cheekbones
+    if (fwd > 0.35 && up > -0.12 && up < 0.12 && side > 0.35 && side < 0.7) z += 0.005
+    pos.setXYZ(i, x, y, z)
+  }
+  geo.computeVertexNormals()
+  return geo
+}
+
 /** A simple but readable hand: rounded palm block + four finger ridges + thumb. */
 export function handGeometry(): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = []
