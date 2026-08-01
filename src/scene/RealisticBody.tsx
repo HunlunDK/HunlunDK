@@ -65,14 +65,11 @@ export function RealisticBody() {
 
     const g = new THREE.Group()
     const targets: { geo: THREE.BufferGeometry; base: Float32Array; normal: Float32Array; weights: Record<FatRegion, Float32Array>; visceral: Float32Array }[] = []
-    const headBox = new THREE.Box3()
 
     src.traverse((o) => {
       const m = o as THREE.Mesh
       if (!m.isMesh) return
-      // Skip the eyes — a smooth mannequin head replaces the realistic face.
       const nm = ((m.name || '') + ' ' + ((m.material as THREE.Material)?.name || '')).toLowerCase()
-      if (nm.includes('eye')) return
       const finalM = fit.clone().multiply(m.matrixWorld)
       const geo = m.geometry.clone()
       geo.applyMatrix4(finalM)
@@ -94,64 +91,16 @@ export function RealisticBody() {
         const weights = {} as Record<FatRegion, Float32Array>
         for (const r of FAT_REGIONS) weights[r] = new Float32Array(pos.count)
         const visceral = new Float32Array(pos.count)
-        const v = new THREE.Vector3()
         for (let i = 0; i < pos.count; i++) {
           const x = base[i * 3], y = base[i * 3 + 1], z = base[i * 3 + 2]
           const t = (y - bb.min.y) / h
           const ax = Math.abs(x)
           for (const r of FAT_REGIONS) weights[r][i] = BANDS[r].weight(t, x, z, ax)
           visceral[i] = BANDS.abdomen.weight(t, x, z, ax) * sstep(0.0, 0.05, z)
-          if (t > 0.9) headBox.expandByPoint(v.set(x, y, z)) // gather the real head bounds
         }
         targets.push({ geo, base, normal, weights, visceral })
       }
     })
-
-    // Mannequin head — a smooth, featureless form overlaid on the real head to
-    // cover the photoreal face (a fitness avatar doesn't need facial detail).
-    if (!headBox.isEmpty()) {
-      const hc = new THREE.Vector3(); const hs = new THREE.Vector3()
-      headBox.getCenter(hc); headBox.getSize(hs)
-      const ex = hs.x * 0.64 + 0.008
-      const ey = hs.y * 0.76 + 0.008 // tall enough to cover crown → jaw
-      const ez = hs.z * 0.72 + 0.012
-      const headGeo = new THREE.SphereGeometry(1, 64, 56)
-      const hp = headGeo.attributes.position as THREE.BufferAttribute
-      const tmp = new THREE.Vector3()
-      for (let i = 0; i < hp.count; i++) {
-        tmp.fromBufferAttribute(hp, i)
-        const up = tmp.y // -1 chin … 1 crown
-        const fwd = tmp.z // + front (face)
-        // smooth head silhouette — all displacements use smoothstep to avoid seams
-        const width = 0.62 + 0.38 * sstep(-0.85, 0.2, up) // narrow chin → full cranium
-        let x = tmp.x * ex * width
-        let y = tmp.y * ey
-        let z = tmp.z * ez
-        // occipital bulge (back of skull projects rearward)
-        z -= sstep(-0.05, -0.85, fwd) * ez * 0.3
-        // jaw depth pulls in at the lower front; chin projects gently
-        const lower = sstep(0.0, -0.85, up)
-        z *= 1 - 0.22 * lower * sstep(-0.3, 0.5, fwd)
-        const chin = sstep(-0.2, -0.8, up) * sstep(0.05, 0.7, fwd)
-        z += chin * ez * 0.2
-        y -= sstep(-0.35, -0.9, up) * ey * 0.05
-        // subtle flat face plane (not a round ball), smoothly masked to mid-face
-        const faceMask = sstep(0.45, 0.95, fwd) * sstep(0.62, 0.0, Math.abs(up - 0.05))
-        z -= faceMask * ez * 0.1
-        hp.setXYZ(i, x, y, z)
-      }
-      headGeo.computeVertexNormals()
-      // centre on the real head, drop slightly to cover the jaw, nudge forward
-      headGeo.translate(hc.x, hc.y - ey * 0.12, hc.z + hs.z * 0.04)
-      const headMat = new THREE.MeshPhysicalMaterial({
-        color: new THREE.Color('#c9a487'), roughness: 0.74, metalness: 0,
-        clearcoat: 0.1, clearcoatRoughness: 0.6, sheen: 0.3, sheenColor: new THREE.Color('#e8c4a4'),
-        envMapIntensity: 0.55,
-      })
-      const headMesh = new THREE.Mesh(headGeo, headMat)
-      headMesh.castShadow = true
-      g.add(headMesh)
-    }
 
     return { group: g, morphTargets: targets }
   }, [gltf])
