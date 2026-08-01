@@ -38,6 +38,8 @@ interface KineticaState {
   /** 0..1 timeline scrub of the current exercise animation */
   exercisePhase: number
   playing: boolean
+  /** world-space focus (centroid + radius) of the working muscles, for the camera */
+  exerciseFocus: { x: number; y: number; z: number; r: number } | null
 
   /** currently highlighted muscle/structure id (hover/pin) */
   highlighted: string | null
@@ -57,6 +59,7 @@ interface KineticaState {
   selectExercise: (id: string | null) => void
   setExercisePhase: (p: number) => void
   setPlaying: (p: boolean) => void
+  setExerciseFocus: (f: { x: number; y: number; z: number; r: number } | null) => void
   setHighlighted: (id: string | null) => void
   setPinned: (id: string | null) => void
   setHighlightedLabel: (label: string | null) => void
@@ -94,6 +97,7 @@ export const useStore = create<KineticaState>((set) => ({
   selectedExercise: null,
   exercisePhase: 0,
   playing: false,
+  exerciseFocus: null,
   highlighted: null,
   pinned: null,
   highlightedLabel: null,
@@ -143,6 +147,7 @@ export const useStore = create<KineticaState>((set) => ({
     set({ selectedExercise, exercisePhase: 0, playing: selectedExercise != null }),
   setExercisePhase: (exercisePhase) => set({ exercisePhase }),
   setPlaying: (playing) => set({ playing }),
+  setExerciseFocus: (exerciseFocus) => set({ exerciseFocus }),
   setHighlighted: (highlighted) => set({ highlighted }),
   setPinned: (pinned) => set({ pinned }),
   setHighlightedLabel: (highlightedLabel) => set({ highlightedLabel }),

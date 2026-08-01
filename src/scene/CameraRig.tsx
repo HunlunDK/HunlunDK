@@ -25,6 +25,7 @@ export function CameraRig() {
   const controls = useRef<CameraControls>()
   const mode = useStore((s) => s.mode)
   const selectedExercise = useStore((s) => s.selectedExercise)
+  const exerciseFocus = useStore((s) => s.exerciseFocus)
   const pinned = useStore((s) => s.pinned)
 
   useEffect(() => {
@@ -45,15 +46,22 @@ export function CameraRig() {
     const c = controls.current
     if (!c) return
     if (mode === 'exercise' && selectedExercise) {
-      const ex = exerciseById(selectedExercise)
-      const f = FOCUS[ex?.focus ?? 'elbow']
-      c.setLookAt(f.cam[0], f.cam[1] + 0.05, f.cam[2], f.tgt[0], f.tgt[1] + 0.05, f.tgt[2], true)
+      if (exerciseFocus) {
+        // frame the actual working-muscle centroid from a front-¾ angle
+        const { x, y, z, r } = exerciseFocus
+        const dist = Math.max(0.7, r * 3.2)
+        c.setLookAt(x + dist * 0.75, y + dist * 0.28, z + dist * 0.95, x, y, z, true)
+      } else {
+        const ex = exerciseById(selectedExercise)
+        const f = FOCUS[ex?.focus ?? 'elbow']
+        c.setLookAt(f.cam[0], f.cam[1] + 0.05, f.cam[2], f.tgt[0], f.tgt[1] + 0.05, f.tgt[2], true)
+      }
     } else if (mode === 'physique') {
       c.setLookAt(0.9, 0.4, 4.6, 0, 0.0, 0, true)
     } else {
       c.setLookAt(0.8, 0.9, 4.2, 0, 0.2, 0, true)
     }
-  }, [mode, selectedExercise])
+  }, [mode, selectedExercise, exerciseFocus])
 
   useEffect(() => {
     const c = controls.current

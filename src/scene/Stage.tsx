@@ -44,11 +44,11 @@ export function Stage({ children, dof = false }: { children: ReactNode; dof?: bo
       {children}
 
       <ContactShadows
-        position={[0, -3.02, 0]}
-        opacity={0.55}
-        scale={16}
-        blur={2.6}
-        far={5}
+        position={[0, -1.06, 0]}
+        opacity={0.7}
+        scale={5}
+        blur={2.4}
+        far={2.2}
         resolution={1024}
         color="#000000"
       />
