@@ -56,6 +56,11 @@ export function CameraRig() {
         const f = FOCUS[ex?.focus ?? 'elbow']
         c.setLookAt(f.cam[0], f.cam[1] + 0.05, f.cam[2], f.tgt[0], f.tgt[1] + 0.05, f.tgt[2], true)
       }
+    } else if (mode === 'lab') {
+      // The curl swings in the sagittal plane about a medial-lateral axis, so a
+      // lateral (side) view reads the hinge clearly — upper arm and forearm stay
+      // distinct as the elbow opens and closes. Elbow is anchored at the origin.
+      c.setLookAt(2.15, 0.12, 0.75, 0.0, 0.0, 0.0, true)
     } else if (mode === 'physique') {
       c.setLookAt(0.9, 0.4, 4.6, 0, 0.0, 0, true)
     } else {

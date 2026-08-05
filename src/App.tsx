@@ -4,14 +4,17 @@ import { AdaptiveDpr, AdaptiveEvents, PerformanceMonitor } from '@react-three/dr
 import { Stage } from './scene/Stage'
 import { RealisticAnatomy } from './scene/RealisticAnatomy'
 import { RealisticBody } from './scene/RealisticBody'
+import { BicepLab } from './scene/BicepLab'
 import { CameraRig } from './scene/CameraRig'
 import { Playhead } from './scene/Playhead'
 import { useStore } from './state/store'
 import { TopBar } from './ui/TopBar'
 import { LayerRail } from './ui/LayerRail'
+import { LabRail } from './ui/LabRail'
 import { ExplorePanel } from './ui/ExplorePanel'
 import { ExercisePanel } from './ui/ExercisePanel'
 import { PhysiquePanel } from './ui/PhysiquePanel'
+import { LabPanel } from './ui/LabPanel'
 import { Onboarding } from './ui/Onboarding'
 import { Loader } from './ui/Loader'
 
@@ -37,7 +40,7 @@ export default function App() {
         <AdaptiveEvents />
         <Suspense fallback={null}>
           <Stage dof={false}>
-            {mode === 'physique' ? <RealisticBody /> : <RealisticAnatomy />}
+            {mode === 'physique' ? <RealisticBody /> : mode === 'lab' ? <BicepLab /> : <RealisticAnatomy />}
           </Stage>
         </Suspense>
         <CameraRig />
@@ -48,10 +51,12 @@ export default function App() {
 
       <div className="ui-overlay">
         <TopBar />
+        <LabRail />
         {mode === 'explore' && <LayerRail />}
         {mode === 'explore' && <ExplorePanel />}
         {mode === 'exercise' && <ExercisePanel />}
         {mode === 'physique' && <PhysiquePanel />}
+        {mode === 'lab' && <LabPanel />}
       </div>
 
       <Onboarding />

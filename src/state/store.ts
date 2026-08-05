@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type Mode = 'explore' | 'exercise' | 'physique'
+export type Mode = 'explore' | 'exercise' | 'physique' | 'lab'
 export type Sex = 'male' | 'female'
 
 /** Anatomy layers, from outermost to innermost. */
@@ -47,6 +47,11 @@ interface KineticaState {
   /** human-readable anatomical name of the hovered/pinned structure */
   highlightedLabel: string | null
 
+  /** Bicep Lab — target elbow flex the user is steering toward (0..1) */
+  labTarget: number
+  /** Bicep Lab — current smoothed flex the scene is rendering (0..1) */
+  labFlex: number
+
   setMode: (m: Mode) => void
   setSex: (s: Sex) => void
   toggleLayer: (k: LayerKey) => void
@@ -63,6 +68,13 @@ interface KineticaState {
   setHighlighted: (id: string | null) => void
   setPinned: (id: string | null) => void
   setHighlightedLabel: (label: string | null) => void
+
+  /** steer elbow flex by a delta (arrow keys / hold buttons), clamped 0..1 */
+  nudgeLabTarget: (d: number) => void
+  /** set elbow flex target directly (slider), clamped 0..1 */
+  setLabTarget: (v: number) => void
+  /** scene reports the smoothed flex it is currently rendering */
+  setLabFlex: (v: number) => void
 }
 
 const defaultLayers: Record<LayerKey, LayerState> = {
@@ -101,6 +113,8 @@ export const useStore = create<KineticaState>((set) => ({
   highlighted: null,
   pinned: null,
   highlightedLabel: null,
+  labTarget: 0,
+  labFlex: 0,
 
   setMode: (mode) =>
     set((s) => {
@@ -151,6 +165,9 @@ export const useStore = create<KineticaState>((set) => ({
   setHighlighted: (highlighted) => set({ highlighted }),
   setPinned: (pinned) => set({ pinned }),
   setHighlightedLabel: (highlightedLabel) => set({ highlightedLabel }),
+  nudgeLabTarget: (d) => set((s) => ({ labTarget: Math.min(1, Math.max(0, s.labTarget + d)) })),
+  setLabTarget: (v) => set({ labTarget: Math.min(1, Math.max(0, v)) }),
+  setLabFlex: (v) => set({ labFlex: v }),
 }))
 
 /** Prettify a raw BodyParts3D mesh name for display. */

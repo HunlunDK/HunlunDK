@@ -76,6 +76,52 @@
 }
 .layer-row.on .toggle::after { transform: translateX(14px); }
 
+/* ---------- Lab rail (left testing menu) ---------- */
+.lab-rail {
+  position: absolute;
+  left: 22px; bottom: 22px;
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 10px;
+  width: 190px;
+}
+.lab-rail h4 { font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-dim); margin-bottom: 4px; padding: 0 4px; }
+.lab-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 11px; border-radius: 12px; text-align: left;
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+.lab-item:hover { background: rgba(255,255,255,0.05); }
+.lab-item.on { background: rgba(79,209,197,0.1); border-color: var(--accent); }
+.lab-item .ico { font-size: 20px; line-height: 1; filter: saturate(1.1); }
+.lab-item .txt { display: flex; flex-direction: column; gap: 2px; }
+.lab-item .txt .n { font-size: 13.5px; font-weight: 600; color: var(--text-hi); }
+.lab-item .txt .s { font-size: 10.5px; color: var(--text-lo); letter-spacing: 0.02em; }
+
+/* ---------- Lab panel ---------- */
+.lab-panel { width: min(560px, calc(100vw - 260px)); }
+.lab-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+.lab-head p { margin-top: 4px; max-width: 340px; }
+.lab-readout { display: flex; gap: 18px; flex-shrink: 0; }
+.lab-readout .stat { display: flex; flex-direction: column; align-items: flex-end; }
+.lab-readout .stat .v { font-size: 22px; color: var(--text-hi); line-height: 1.1; }
+.lab-readout .stat .l { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); }
+
+.lab-controls { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+.lab-track { flex: 1; }
+.lab-track input[type=range] { width: 100%; }
+.hold-btn {
+  padding: 10px 16px; border-radius: 11px; font-size: 12.5px; font-weight: 600;
+  color: var(--text); background: rgba(255,255,255,0.05); border: 1px solid var(--stroke);
+  white-space: nowrap; touch-action: none; user-select: none;
+  transition: background 0.14s, transform 0.1s;
+}
+.hold-btn:hover { background: rgba(255,255,255,0.09); }
+.hold-btn:active { transform: scale(0.96); }
+.hold-btn.accent { color: #04110f; background: var(--accent); border-color: transparent; }
+.hold-btn.accent:hover { background: #5fe0d4; }
+.lab-panel .hint b { color: var(--accent); font-family: var(--mono); }
+
 /* ---------- Panels ---------- */
 .panel {
   position: absolute;
